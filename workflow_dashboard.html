@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Geolocation Workflow Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+        .card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        h1, h2, h3 {
+            margin-top: 0;
+            color: #1a73e8;
+        }
+        h1 { text-align: center; color: #333; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #606770; margin-bottom: 25px; }
+        p { font-size: 14px; line-height: 1.5; color: #4b4f56; }
+        button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #1557b0; }
+        .status-box {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            background: #f8f9fa;
+            border: 1px solid #dadce0;
+            min-height: 40px;
+            word-break: break-all;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #e4e6eb;
+        }
+        th { background-color: #f8f9fa; color: #65676b; }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .badge-success { background: #e6f4ea; color: #137333; }
+        .badge-error { background: #fce8e6; color: #c5221f; }
+        .clear-btn {
+            background-color: #f4f6f9;
+            color: #4b4f56;
+            border: 1px solid #dadce0;
+            margin-top: 10px;
+            padding: 8px;
+            font-size: 13px;
+        }
+        .clear-btn:hover { background-color: #e4e6eb; }
+    </style>
+</head>
+<body>
+
+    <h1>Application Workflow Environment</h1>
+    <p class="subtitle">A full client-server simulation demonstrating how frontend requests pass to a backend model</p>
+
+    <div class="dashboard">
+        
+        <!-- Left Panel: The Frontend Client Component -->
+        <div class="card">
+            <h2>1. Client Interface (Frontend)</h2>
+            <p>This side represents the application code executing inside the user's web browser layer. Clicking the button initiates the hardware Geolocation API function.</p>
+            <button onclick="triggerFrontendPrompt()">Simulate Interface Request</button>
+            
+            <h3>Console Log Output:</h3>
+            <div id="frontendStatus" class="status-box">Awaiting action... Trigger the request to observe API behavior.</div>
+        </div>
+
+        <!-- Right Panel: The Mock Backend Component -->
+        <div class="card">
+            <h2>2. Server Endpoint (Backend Log)</h2>
+            <p>This side models the receiving server endpoint. If and only if the client interface successfully extracts the values via explicit opt-in, it transmits a simulated payload package over to this layer.</p>
+            
+            <h3>Incoming Network Payload Buffer:</h3>
+            <div id="backendNetworkLog" class="status-box">No network traffic detected. Server endpoint is listening...</div>
+        </div>
+
+        <!-- Bottom Panel: Simulated Database Log View -->
+        <div class="card full-width">
+            <h2>3. Database Log Viewer (Persistent Data Store)</h2>
+            <p>Authorized personnel log records view. Real-world systems read this index from SQL/NoSQL tables. This local interface renders successfully submitted records from browser cache allocation.</p>
+            
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Timestamp (UTC)</th>
+                        <th>Status Badge</th>
+                        <th>Latitude Position</th>
+                        <th>Longitude Position</th>
+                        <th>Error Reference / Context Exception</th>
+                    </tr>
+                </thead>
+                <tbody id="dataBody">
+                    <!-- Dynamic Rows Go Here -->
+                </tbody>
+            </table>
+            <button class="clear-btn" onclick="clearSimulatedLogs()">Clear Saved Dashboard State</button>
+        </div>
+
+    </div>
+
+    <script>
+        // On initialization, load existing data from local storage simulation
+        document.addEventListener("DOMContentLoaded", renderLogs);
+
+        function triggerFrontendPrompt() {
+            const frontStatus = document.getElementById("frontendStatus");
+            const backLog = document.getElementById("backendNetworkLog");
+
+            if ("geolocation" in navigator) {
+                frontStatus.style.color = "#1a73e8";
+                frontStatus.innerText = "[JS API] Executing navigator.geolocation.getCurrentPosition(). Prompting system Layer...";
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        // Success Handler Path
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const timestamp = new Date().toISOString();
+
+                        frontStatus.style.color = "#137333";
+                        frontStatus.innerHTML = `[SUCCESS] Permissions verified.<br>Extracted Core: Lat=${lat}, Lng=${lng}`;
+
+                        // Simulate Fetch Request payload serialization to the backend
+                        const payload = {
+                            method: "POST",
+                            endpoint: "/api/save-location",
+                            headers: { "Content-Type": "application/json" },
+                            body: { latitude: lat, longitude: lng, time: timestamp }
+                        };
+
+                        backLog.style.color = "#137333";
+                        backLog.innerHTML = `[INCOMING POST 200 OK]<br>${JSON.stringify(payload, null, 2)}`;
+
+                        saveLogRecord({ time: timestamp, status: "SUCCESS", lat: lat, lng: lng, err: "None (Authorized Process)" });
+                    },
+                    (error) => {
+                        // Error Handler Path (Rejection or Hardware failure)
+                        const timestamp = new Date().toISOString();
+                        
+                        frontStatus.style.color = "#c5221f";
+                        frontStatus.innerText = `[REJECTED] Core Access Denied: ${error.message}`;
+
+                        backLog.style.color = "#c5221f";
+                        backLog.innerHTML = `[NETWORK SILENCE] No data sent. Client-side error threw exception code. Transmission aborted by browser sandbox.`;
+
+                        saveLogRecord({ time: timestamp, status: "DENIED", lat: "N/A", lng: "N/A", err: error.message });
+                    }
+                );
+            } else {
+                frontStatus.style.color = "#b06000";
+                frontStatus.innerText = "[UNSUPPORTED] This browser context lacks geolocation components.";
+            }
+        }
+
+        function saveLogRecord(record) {
+            let logs = JSON.parse(localStorage.getItem("mock_location_logs")) || [];
+            logs.unshift(record); // Add new events to top of log stack
+            localStorage.setItem("mock_location_logs", JSON.stringify(logs));
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const body = document.getElementById("dataBody");
+            let logs = JSON.parse(localStorage.getItem("mock_location_logs")) || [];
+            
+            if (logs.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#8a8d91;">No historic transaction data found in storage cache.</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = "";
+            logs.forEach(log => {
+                const badgeClass = log.status === "SUCCESS" ? "badge-success" : "badge-error";
+                body.innerHTML += `
+                    <tr>
+                        <td>${log.time}</td>
+                        <td><span class="badge ${badgeClass}">${log.status}</span></td>
+                        <td>${log.lat}</td>
+                        <td>${log.lng}</td>
+                        <td style="color: ${log.status === 'SUCCESS' ? '#65676b' : '#c5221f'}">${log.err}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function clearSimulatedLogs() {
+            localStorage.removeItem("mock_location_logs");
+            document.getElementById("frontendStatus").innerText = "Awaiting action...";
+            document.getElementById("backendNetworkLog").innerText = "No network traffic detected.";
+            renderLogs();
+        }
+    </script>
+
+</body>
+</html>
